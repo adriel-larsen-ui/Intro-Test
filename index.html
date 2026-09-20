@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curio — Automations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --negro:#46004f;
+  --card:#12121a;
+  --glass:rgba(22,22,34,.55);
+  --glass-2:rgba(30,30,46,.6);
+  --borde:rgba(124,58,237,.14);
+  --borde-hover:rgba(124,58,237,.45);
+  --violeta:#7c3aed;
+  --violeta2:#6d28d9;
+  --cyan:#fffc30;
+  --verde:#10b981;
+  --texto:#e6e8f2;
+  --gris:#9aa4bd;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--negro);color:var(--texto);
+  font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+/* Fondo global de glows fijos */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(700px 500px at 100% -5%,rgba(124,58,237,.18),transparent 60%),
+    radial-gradient(600px 500px at -8% 8%,rgba(6,182,212,.14),transparent 55%),
+    radial-gradient(700px 600px at 50% 118%,rgba(16,185,129,.10),transparent 60%);
+}
+h1,h2,.section-title,.nav-logo,.stat-num{font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;}
+
+/* Animaciones */
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+@keyframes floatOrb{0%,100%{transform:translate(-50%,0) scale(1);}50%{transform:translate(-50%,-24px) scale(1.06);}}
+.animate{opacity:0;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) forwards;}
+.d1{animation-delay:.05s;}.d2{animation-delay:.15s;}.d3{animation-delay:.28s;}.d4{animation-delay:.42s;}
+/* Reveal on scroll (clase agregada por JS) */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
+.reveal.in{opacity:1;transform:none;}
+@keyframes shimmer{to{background-position:200% center;}}
+@media (prefers-reduced-motion:reduce){
+  .animate{animation:none;opacity:1;}
+  .reveal{opacity:1;transform:none;transition:none;}
+  .hero::before,.nav-logo,.hero h1 span,.stat-num{animation:none;}
+}
+
+/* Barra de progreso de scroll */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;background:linear-gradient(90deg,var(--violeta),var(--cyan),var(--verde));box-shadow:0 0 12px rgba(124,58,237,.65);transition:width .08s linear;}
+/* Shimmer sutil en textos con degradado */
+.nav-logo,.hero h1 span,.stat-num{background-size:200% auto;animation:shimmer 6s linear infinite;}
+
+/* Orbes de fondo con parallax */
+.orbs{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;will-change:transform;transition:transform .1s linear;}
+.orb-1{width:520px;height:520px;top:-140px;right:-80px;background:radial-gradient(circle,rgba(124,58,237,.5),transparent 70%);}
+.orb-2{width:460px;height:460px;top:38%;left:-160px;background:radial-gradient(circle,rgba(6,182,212,.42),transparent 70%);}
+.orb-3{width:560px;height:560px;bottom:-200px;left:45%;background:radial-gradient(circle,rgba(16,185,129,.34),transparent 70%);}
+@media (prefers-reduced-motion:reduce){.orb{transition:none;}}
+
+/* Microinteracciones en iconos de cards */
+.modulo-icon,.auto-icon{display:inline-block;transition:transform .3s cubic-bezier(.34,1.56,.64,1);transform-origin:center;}
+.modulo-card:hover .modulo-icon{transform:scale(1.22) rotate(-8deg);}
+.auto-card:hover .auto-icon{transform:scale(1.22) rotate(-8deg);}
+.paso-num{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;}
+.paso:hover .paso-num{transform:scale(1.12) translateY(-2px) rotate(4deg);box-shadow:0 14px 30px -10px rgba(124,58,237,.95);}
+@media (prefers-reduced-motion:reduce){
+  .modulo-icon,.auto-icon,.paso-num,.modulo-card:hover .modulo-icon,.auto-card:hover .auto-icon,.paso:hover .paso-num{transition:none;transform:none;}
+}
+
+nav{transition:background .3s,box-shadow .3s,padding .3s;position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,7,13,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--borde);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.nav-logo{font-size:18px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-links{display:flex;gap:24px;}
+.nav-links a{font-size:13px;font-weight:600;color:var(--gris);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:white;}
+.nav-cta{background:linear-gradient(135deg,var(--violeta),var(--cyan));color:white;border:none;padding:9px 20px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;box-shadow:0 8px 22px -8px rgba(124,58,237,.7);transition:transform .2s,box-shadow .2s;}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(124,58,237,.85);}
+nav.scrolled{background:rgba(7,7,13,.92);box-shadow:0 10px 34px -14px rgba(0,0,0,.8);padding:10px 24px;}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-200px;left:50%;width:800px;height:800px;background:radial-gradient(circle,rgba(124,58,237,.2) 0%,transparent 70%);pointer-events:none;animation:floatOrb 9s ease-in-out infinite;}
+.hero>div{position:relative;z-index:1;}
+.hero-badge{display:inline-block;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.4);color:#c4b5fd;font-size:12px;font-weight:700;padding:7px 16px;border-radius:99px;margin-bottom:22px;text-transform:uppercase;letter-spacing:1px;backdrop-filter:blur(6px);}
+.hero h1{font-size:clamp(38px,6vw,74px);font-weight:700;line-height:1.08;margin-bottom:20px;}
+.hero h1 span{background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{font-size:18px;color:var(--gris);max-width:600px;margin:0 auto 36px;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:linear-gradient(135deg,var(--violeta),#4f46e5);color:white;padding:15px 30px;border-radius:14px;font-size:15px;font-weight:700;text-decoration:none;transition:transform .2s,box-shadow .2s,filter .2s;box-shadow:0 14px 34px -12px rgba(124,58,237,.75);}
+.btn-primary:hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 18px 40px -12px rgba(124,58,237,.9);}
+.btn-secondary{background:rgba(255,255,255,.03);color:white;padding:15px 30px;border-radius:14px;font-size:15px;font-weight:700;text-decoration:none;border:1.5px solid var(--borde);transition:border-color .2s,background .2s;backdrop-filter:blur(6px);}
+.btn-secondary:hover{border-color:#a78bfa;background:rgba(255,255,255,.06);}
+.stats{display:flex;gap:0;justify-content:center;flex-wrap:wrap;border-top:1px solid var(--borde);border-bottom:1px solid var(--borde);background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.stat{flex:1;min-width:150px;text-align:center;padding:30px 20px;border-right:1px solid var(--borde);transition:background .2s;}
+.stat:hover{background:rgba(124,58,237,.06);}
+.stat:last-child{border-right:none;}
+.stat-num{font-size:38px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-label{font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;}
+section{padding:88px 24px;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.section-tag{font-size:12px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.section-title{font-size:clamp(28px,4vw,44px);font-weight:700;margin-bottom:14px;}
+.section-sub{font-size:16px;color:var(--gris);max-width:580px;margin-bottom:48px;}
+.modulos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+.modulo-card{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--borde);border-radius:18px;padding:22px;transition:border-color .25s,transform .25s,box-shadow .25s;position:relative;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);}
+.modulo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violeta),var(--cyan));opacity:0;transition:opacity .25s;}
+.modulo-card:hover{border-color:var(--borde-hover);transform:translateY(-4px);box-shadow:0 22px 44px -24px rgba(124,58,237,.6);}
+.modulo-card:hover::before{opacity:1;}
+.modulo-icon{font-size:28px;margin-bottom:10px;}
+.modulo-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;margin-bottom:10px;display:inline-block;text-transform:uppercase;letter-spacing:.5px;}
+.tag-psi{background:rgba(124,58,237,.2);color:#c4b5fd;}
+.tag-doc{background:rgba(6,182,212,.2);color:#67e8f9;}
+.tag-auto{background:rgba(16,185,129,.2);color:#6ee7b7;}
+.tag-inmo{background:rgba(245,158,11,.2);color:#fcd34d;}
+.tag-concejal{background:rgba(239,68,68,.2);color:#fca5a5;}
+.tag-seguro{background:rgba(6,78,59,.4);color:#6ee7b7;}
+.modulo-titulo{font-size:15px;font-weight:800;color:white;margin-bottom:6px;}
+.modulo-desc{font-size:12px;color:var(--gris);line-height:1.5;}
+.demo-banner{background:linear-gradient(135deg,rgba(6,182,212,.14),rgba(124,58,237,.14));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(6,182,212,.3);border-radius:18px;padding:28px 32px;margin-bottom:40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.demo-banner-texto h3{font-size:18px;font-weight:800;color:white;margin-bottom:6px;}
+.demo-banner-texto p{font-size:13px;color:var(--gris);}
+.btn-demo{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cyan),var(--violeta));color:white;padding:13px 26px;border-radius:12px;font-size:14px;font-weight:800;text-decoration:none;transition:transform .2s,box-shadow .2s,filter .2s;white-space:nowrap;box-shadow:0 12px 28px -12px rgba(6,182,212,.6);}
+.btn-demo:hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 16px 34px -12px rgba(6,182,212,.75);}
+.btn-demo-verde{background:linear-gradient(135deg,var(--verde),#0891b2);}
+.btn-demo-rojo{background:linear-gradient(135deg,#ef4444,#7c3aed);}
+.btn-demo-seguro{background:linear-gradient(135deg,#059669,#065f46);}
+.auto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+.auto-card{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--borde);border-radius:16px;padding:22px;transition:border-color .25s,transform .25s,box-shadow .25s;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);}
+.auto-card:hover{border-color:rgba(16,185,129,.4);transform:translateY(-4px);box-shadow:0 22px 44px -24px rgba(16,185,129,.5);}
+.auto-icon{font-size:32px;margin-bottom:12px;}
+.auto-titulo{font-size:14px;font-weight:800;color:white;margin-bottom:6px;}
+.auto-desc{font-size:12px;color:var(--gris);line-height:1.5;}
+.proceso-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.paso{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--borde);border-radius:16px;padding:24px 22px;text-align:center;transition:border-color .25s,transform .25s;}
+.paso:hover{border-color:var(--borde-hover);transform:translateY(-4px);}
+.paso-num{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--violeta),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;margin:0 auto 14px;box-shadow:0 10px 24px -10px rgba(124,58,237,.8);}
+.paso-titulo{font-size:14px;font-weight:800;color:white;margin-bottom:6px;}
+.paso-desc{font-size:12px;color:var(--gris);}
+.cta-section{background:linear-gradient(135deg,rgba(124,58,237,.16),rgba(6,182,212,.1));border-top:1px solid var(--borde);border-bottom:1px solid var(--borde);text-align:center;padding:88px 24px;}
+.cta-section h2{font-size:clamp(28px,4vw,48px);font-weight:700;margin-bottom:14px;}
+.cta-section p{font-size:16px;color:var(--gris);margin-bottom:36px;}
+.btn-wsp{display:inline-flex;align-items:center;gap:10px;background:#25d366;color:white;padding:17px 34px;border-radius:14px;font-size:16px;font-weight:800;text-decoration:none;transition:transform .2s,box-shadow .2s,filter .2s;box-shadow:0 14px 34px -12px rgba(37,211,102,.6);}
+.btn-wsp:hover{transform:translateY(-2px);filter:brightness(1.05);box-shadow:0 18px 40px -12px rgba(37,211,102,.8);}
+footer{background:var(--glass);backdrop-filter:blur(12px);border-top:1px solid var(--borde);padding:32px 24px;text-align:center;}
+footer p{font-size:12px;color:var(--gris);}
+footer a{color:#c4b5fd;text-decoration:none;}
+.divider{height:1px;background:var(--borde);margin:0;}
+@media(max-width:600px){
+  .nav-links{display:none;}
+  .stats{flex-direction:column;}
+  .stat{border-right:none;border-bottom:1px solid var(--borde);}
+  .stat:last-child{border-bottom:none;}
+  .demo-banner{flex-direction:column;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div class="orbs" aria-hidden="true">
+  <div class="orb orb-1" data-speed="0.18"></div>
+  <div class="orb orb-2" data-speed="0.30"></div>
+  <div class="orb orb-3" data-speed="0.12"></div>
+</div>
+
+<nav>
+  <div class="nav-logo">CURIO</div>
+  <div class="nav-links">
+    <a href="#psicopedagogia">Psicopedagogía</a>
+    <a href="#docentes">Docentes</a>
+    <a href="#inmobiliaria">Inmobiliaria</a>
+    <a href="#concejal">Concejales</a>
+    <a href="#seguros">Seguros</a>
+    <a href="#automatizacion">Automatización</a>
+    <a href="#contacto">Contacto</a>
+  </div>
+  <a href="https://wa.me/{{# number here}}?text=Hola%20Gerardo,%20vi%20tu%20sitio%20y%20quiero%20conocer%20más" target="_blank" class="nav-cta">Contactar →</a>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="hero-badge animate d1">⚡ AI for Business</div>
+    <h1 class="animate d2">Soluciones con <span>Inteligencia Artificial</span> para educación, salud y negocios</h1>
+    <p class="animate d3">Módulos clínicos para psicopedagogos, herramientas para docentes, gestión inmobiliaria, legislativa y de seguros con IA. Sin complicaciones técnicas.</p>
+    <div class="hero-btns animate d4">
+      <a href="#psicopedagogia" class="btn-primary">Ver módulos</a>
+      <a href="https://wa.me/5493329599250?text=Hola%20Gerardo,%20quiero%20una%20demo" target="_blank" class="btn-secondary">Pedir demo gratis</a>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">19+</div><div class="stat-label">Módulos desarrollados</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Áreas de solución</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Sin papel ni servidores</div></div>
+  <div class="stat"><div class="stat-num">0$</div><div class="stat-label">Infraestructura para el cliente</div></div>
+</div>
+
+<!-- PSICOPEDAGOGÍA -->
+<section id="psicopedagogia">
+  <div class="section-inner">
+    <div class="section-tag">🧠 Para psicopedagogos y profesionales de la salud</div>
+    <h2 class="section-title">Suite Inclusiva IA</h2>
+    <p class="section-sub">18 módulos clínicos que reemplazan horas de redacción manual. Documentos profesionales listos para imprimir en segundos.</p>
+    <div class="demo-banner" style="margin-bottom:40px;">
+      <div class="demo-banner-texto">
+        <h3>🧠 Asistente Psicopedagógico IA — Chat en vivo</h3>
+        <p>Informes automáticos, estrategias para dislexia y TDAH, orientación a familias y adaptaciones curriculares con IA real.</p>
+      </div>
+      <a href="https://dobleproa1900-byte.github.io/psico-ia" target="_blank" class="btn-demo" style="background:linear-gradient(135deg,#6b21a8,#9333ea);">▶ Usar Asistente IA</a>
+    </div>
+    <div class="modulos-grid">
+      <div class="modulo-card"><div class="modulo-icon">🧬</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Módulo de Anamnesis</div><div class="modulo-desc">Procesá entrevistas iniciales y generá la historia vital completa en segundos con terminología clínica formal.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📊</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Diagnóstico Psicopedagógico</div><div class="modulo-desc">Cruzá indicadores de pruebas cognitivas y pedagógicas para estructurar hipótesis diagnósticas de alta precisión.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📋</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Generador de PMP</div><div class="modulo-desc">Confeccioná actas oficiales de Propuesta de Mediaciones Pedagógicas bajo normativa DGCyE con firmas imprimibles.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📜</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Asistente de PPI</div><div class="modulo-desc">Configurá objetivos trimestrales, criterios de evaluación y barreras de acceso para el Proyecto Pedagógico Individual.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📈</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Informes de Evolución</div><div class="modulo-desc">Redactá reportes bimestrales y trimestrales con terminología neurocognitiva formal a partir de matrices evolutivas.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">💼</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Gestión Psicopedagógica</div><div class="modulo-desc">Redactá devoluciones institucionales para escuelas, médicos tratantes o familias con marco clínico profesional.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🧩</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Generador de Actividades</div><div class="modulo-desc">Diseñá fichas pedagógicas personalizadas para intervenciones en consultorio, adaptadas al diagnóstico del paciente.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🧠</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Registro de Sesión</div><div class="modulo-desc">Documentá la evolución clínica de cada encuentro con narrativa técnica apta para la historia clínica del paciente.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🕒</div><span class="modulo-tag tag-psi">Psicopedagogía</span><div class="modulo-titulo">Agendas Visuales</div><div class="modulo-desc">Diseñá secuencias de rutina con soporte de andamiaje para sesiones clínicas con alumnos con TEA u otras NEE.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DOCENTES -->
+<section id="docentes">
+  <div class="section-inner">
+    <div class="section-tag">📚 Para docentes de nivel primario</div>
+    <h2 class="section-title">Herramientas Docentes IA</h2>
+    <p class="section-sub">Módulos que reducen el tiempo administrativo y generan materiales de calidad adaptados a cada alumno.</p>
+    <div class="demo-banner" style="margin-bottom:24px;">
+      <div class="demo-banner-texto">
+        <h3>📚 Asistente Docente IA — Chat en vivo</h3>
+        <p>Planificaciones, secuencias didácticas, evaluaciones y comunicados a padres generados con IA en segundos.</p>
+      </div>
+      <a href="https://dobleproa1900-byte.github.io/docente-ia" target="_blank" class="btn-demo">▶ Usar Asistente IA</a>
+    </div>
+    <div class="demo-banner">
+      <div class="demo-banner-texto">
+        <h3>🚀 Suite Digital Docente — Demo en vivo</h3>
+        <p>Probá ahora la planificación multinivel, sintetizador de actas, rúbricas y alertas tempranas con IA real.</p>
+      </div>
+      <a href="https://suite-docente-x6zerayacftxwyqnjwbk7b.streamlit.app/" target="_blank" class="btn-demo">▶ Acceder a la Demo</a>
+    </div>
+    <div class="modulos-grid">
+      <div class="modulo-card"><div class="modulo-icon">📝</div><span class="modulo-tag tag-doc">Docentes</span><div class="modulo-titulo">Generador de Lectoescritura</div><div class="modulo-desc">Armá secuencias didácticas basadas en el nivel conceptual del niño e incluye materiales concretos para la sesión.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🔄</div><span class="modulo-tag tag-doc">Docentes</span><div class="modulo-titulo">Adaptador Curricular</div><div class="modulo-desc">Generá configuraciones de acceso y adecuaciones significativas o no significativas desde el contenido del manual escolar.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📝</div><span class="modulo-tag tag-doc">Docentes</span><div class="modulo-titulo">Adaptador de Exámenes</div><div class="modulo-desc">Diversificá evaluaciones a formatos DUA: opción múltiple, completar espacios o emparejamiento visual.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📋</div><span class="modulo-tag tag-doc">Docentes</span><div class="modulo-titulo">Generador de Informes de Logros</div><div class="modulo-desc">Redactá informes pedagógicos trimestrales seleccionando indicadores con un clic. Listo para imprimir y firmar.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🎨</div><span class="modulo-tag tag-doc">Docentes</span><div class="modulo-titulo">Actividades Inclusivas NEE</div><div class="modulo-desc">Banco de actividades imprimibles con pictogramas para alumnos sin lectoescritura. Sin internet, sin API.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📖</div><span class="modulo-tag tag-doc">Docentes</span><div class="modulo-titulo">Recursos Didácticos Adaptados</div><div class="modulo-desc">Cuentos, fichas matemáticas y juegos fonológicos personalizados según el centro de interés y las necesidades del alumno.</div></div>
+    </div>
+    <div class="demo-banner" style="margin-top:24px;">
+      <div class="demo-banner-texto">
+        <h3>📝 EvaluaIA — Demo en vivo</h3>
+        <p>Generá evaluaciones de Lengua, Matemática, Sociales y Naturales adaptadas a cada grado, listas para imprimir.</p>
+      </div>
+      <a href="https://evalua-ia-f4hbxklhskqpmucmc3r39w.streamlit.app/" target="_blank" class="btn-demo">▶ Acceder a la Demo</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INMOBILIARIA -->
+<section id="inmobiliaria">
+  <div class="section-inner">
+    <div class="section-tag">🏠 Para inmobiliarias y agentes de ventas</div>
+    <h2 class="section-title">InmoIA — Gestión Inmobiliaria Inteligente</h2>
+    <p class="section-sub">Publicá propiedades, respondé consultas automáticamente y filtrá clientes serios sin perder tiempo en preguntas repetitivas.</p>
+    <div class="demo-banner">
+      <div class="demo-banner-texto">
+        <h3>🏘️ InmoIA — Demo en vivo</h3>
+        <p>Probá el listado de propiedades con filtros, consultor IA y panel de gestión con estadísticas en tiempo real.</p>
+      </div>
+      <a href="https://inmo-carro-khzhx9vn44hbkwu7xsjrwk.streamlit.app/" target="_blank" class="btn-demo btn-demo-verde">▶ Acceder a la Demo</a>
+    </div>
+    <div class="modulos-grid">
+      <div class="modulo-card"><div class="modulo-icon">🏘️</div><span class="modulo-tag tag-inmo">Inmobiliaria</span><div class="modulo-titulo">Catálogo Digital de Propiedades</div><div class="modulo-desc">Listado con fotos, filtros por tipo, barrio y precio. Cada propiedad con botón de consulta directa por WhatsApp.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🤖</div><span class="modulo-tag tag-inmo">Inmobiliaria</span><div class="modulo-titulo">Consultor IA 24/7</div><div class="modulo-desc">El bot responde automáticamente preguntas frecuentes sobre precios, disponibilidad y ubicación. Sin molestar al dueño.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📊</div><span class="modulo-tag tag-inmo">Inmobiliaria</span><div class="modulo-titulo">Panel de Gestión</div><div class="modulo-desc">Estadísticas de propiedades disponibles, vendidas y en alquiler. Exportación de datos en un clic.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONCEJALES -->
+<section id="concejal">
+  <div class="section-inner">
+    <div class="section-tag">🏛️ Para concejales y gestión municipal</div>
+    <h2 class="section-title">ConcejalIA — Gestión Legislativa Inteligente</h2>
+    <p class="section-sub">Registrá reclamos de vecinos, analizá el territorio por barrio y redactá proyectos de ordenanza con IA en segundos.</p>
+    <div class="demo-banner">
+      <div class="demo-banner-texto">
+        <h3>🏛️ ConcejalIA — Demo en vivo</h3>
+        <p>Probá el tablero de reclamos, registro territorial y redactor automático de ordenanzas y minutas de comunicación.</p>
+      </div>
+      <a href="https://gerardo-sobrino-tyfhdhrzlu2sah9cfnwwam.streamlit.app/" target="_blank" class="btn-demo btn-demo-rojo">▶ Acceder a la Demo</a>
+    </div>
+    <div class="modulos-grid">
+      <div class="modulo-card"><div class="modulo-icon">📊</div><span class="modulo-tag tag-concejal">Concejales</span><div class="modulo-titulo">Tablero Territorial</div><div class="modulo-desc">Visualizá reclamos por barrio, categoría y estado. Gráficos interactivos y evolución temporal en tiempo real.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📝</div><span class="modulo-tag tag-concejal">Concejales</span><div class="modulo-titulo">Registro de Reclamos con Foto</div><div class="modulo-desc">Los vecinos envían foto y ubicación GPS desde el celular. Se actualizan automáticamente en el tablero.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🤖</div><span class="modulo-tag tag-concejal">Concejales</span><div class="modulo-titulo">Redactor de Ordenanzas IA</div><div class="modulo-desc">Convertí reclamos en proyectos legislativos listos para presentar: ordenanzas, minutas y pedidos de informes.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SEGUROS -->
+<section id="seguros">
+  <div class="section-inner">
+    <div class="section-tag">🛡️ Para productores y agencias de seguros</div>
+    <h2 class="section-title">SiniestroIA — Gestión de Siniestros Inteligente</h2>
+    <p class="section-sub">Tus clientes denuncian su siniestro en 2 minutos desde el celular. Vos recibís todo al instante con foto, GPS y datos completos.</p>
+    <div class="demo-banner">
+      <div class="demo-banner-texto">
+        <h3>🛡️ SiniestroIA — Demo en vivo</h3>
+        <p>Probá el panel del productor con tablero de siniestros, estadísticas y detalle completo de cada caso.</p>
+      </div>
+      <a href="https://siniestro-ia-panel-eyyrsbpz8hrk22bcvwaa3t.streamlit.app/" target="_blank" class="btn-demo btn-demo-seguro">▶ Acceder a la Demo</a>
+    </div>
+    <div class="modulos-grid">
+      <div class="modulo-card"><div class="modulo-icon">📱</div><span class="modulo-tag tag-seguro">Seguros</span><div class="modulo-titulo">App de Denuncia para el Cliente</div><div class="modulo-desc">Sin instalar nada. El asegurado abre el link, saca fotos del daño y envía la denuncia con GPS en menos de 2 minutos.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📊</div><span class="modulo-tag tag-seguro">Seguros</span><div class="modulo-titulo">Panel del Productor</div><div class="modulo-desc">Tablero en tiempo real con todos los siniestros recibidos, fotos, ubicación GPS y estado de cada caso.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📈</div><span class="modulo-tag tag-seguro">Seguros</span><div class="modulo-titulo">Estadísticas y Reportes</div><div class="modulo-desc">Análisis de siniestros por tipo, evolución temporal y tasa de resolución. Exportación a Excel con un clic.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div class="divider"></div>
+
+<!-- RESTAURANTIA -->
+<section id="restaurant">
+  <div class="section-inner">
+    <div class="section-tag">🍽️ Para restaurantes, bares y rotiserías</div>
+    <h2 class="section-title">RestaurantIA — Gestión Inteligente de tu Local</h2>
+    <p class="section-sub">Gestioná mesas, pedidos, domicilios y caja desde cualquier dispositivo. Sin papeles, sin errores, sin perder tiempo.</p>
+    <div class="demo-banner">
+      <div class="demo-banner-texto">
+        <h3>🍽️ RestaurantIA — Demo en vivo</h3>
+        <p>Probá el sistema de mesas, pedidos a domicilio con notificación por WhatsApp y cierre de caja automático.</p>
+      </div>
+      <a href="https://restaurant-ia-26ztvnuhdum5klkvrdvrl9.streamlit.app/" target="_blank" class="btn-demo" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">▶ Acceder a la Demo</a>
+    </div>
+    <div class="modulos-grid">
+      <div class="modulo-card"><div class="modulo-icon">🪑</div><span class="modulo-tag tag-auto">Restaurant</span><div class="modulo-titulo">Gestión de Mesas</div><div class="modulo-desc">Estado en tiempo real de todas las mesas, carga de pedidos y generación de ticket de venta en segundos.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">🛵</div><span class="modulo-tag tag-auto">Restaurant</span><div class="modulo-titulo">Pedidos a Domicilio</div><div class="modulo-desc">Registrá pedidos de delivery y notificá al cliente por WhatsApp cuando el pedido está en camino.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">💰</div><span class="modulo-tag tag-auto">Restaurant</span><div class="modulo-titulo">Caja y Estadísticas</div><div class="modulo-desc">Cierre de caja diario, registro de gastos y estadísticas de facturación por tipo de venta.</div></div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- COMUNICADOIA -->
+<section id="comunicado">
+  <div class="section-inner">
+    <div class="section-tag">📢 Para escuelas y directivos</div>
+    <h2 class="section-title">ComunicadoIA — Comunicación Escolar Inteligente</h2>
+    <p class="section-sub">Enviá comunicados a toda la escuela, un grado o una familia específica por WhatsApp en segundos. Sin papel, sin cuaderno de comunicaciones.</p>
+    <div class="demo-banner">
+      <div class="demo-banner-texto">
+        <h3>📢 ComunicadoIA — Demo en vivo</h3>
+        <p>Probá el sistema de comunicados con plantillas, directorio de familias y envío por WhatsApp.</p>
+      </div>
+      <a href="https://flpkcxg8xjmmra636qkm6k.streamlit.app/" target="_blank" class="btn-demo" style="background:linear-gradient(135deg,#0369a1,#0891b2);">▶ Acceder a la Demo</a>
+    </div>
+    <div class="modulos-grid">
+      <div class="modulo-card"><div class="modulo-icon">📢</div><span class="modulo-tag tag-doc">Escuelas</span><div class="modulo-titulo">Comunicados Masivos</div><div class="modulo-desc">Enviá el mismo comunicado a toda la escuela, un turno o un grado con un solo clic por WhatsApp.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">📝</div><span class="modulo-tag tag-doc">Escuelas</span><div class="modulo-titulo">Plantillas Prediseñadas</div><div class="modulo-desc">Actos escolares, reuniones de padres, suspensión de clases y más. Solo completás los datos y enviás.</div></div>
+      <div class="modulo-card"><div class="modulo-icon">👨‍👩‍👧</div><span class="modulo-tag tag-doc">Escuelas</span><div class="modulo-titulo">Directorio de Familias</div><div class="modulo-desc">Base de datos de todos los alumnos y sus familias, con filtros por grado, sección y turno.</div></div>
+    </div>
+  </div>
+</section>
+  <!-- AUTOMATIZACIÓN -->
+<section id="automatizacion">
+  <div class="section-inner">
+    <div class="section-tag">⚙️ Para negocios y profesionales independientes</div>
+    <h2 class="section-title">Automatización con IA</h2>
+    <p class="section-sub">Flujos inteligentes que trabajan por vos las 24 horas. Sin programación, sin servidores caros, sin complicaciones.</p>
+    <div class="auto-grid">
+      <div class="auto-card"><div class="auto-icon">💬</div><div class="auto-titulo">Bot de WhatsApp</div><div class="auto-desc">Respondé consultas automáticamente, calificá leads y derivá al humano cuando es necesario. Funciona 24/7.</div></div>
+      <div class="auto-card"><div class="auto-icon">🔔</div><div class="auto-titulo">Alertas Automáticas</div><div class="auto-desc">Notificaciones por WhatsApp o email ante eventos críticos: stock bajo, vencimientos, anomalías en datos.</div></div>
+      <div class="auto-card"><div class="auto-icon">📅</div><div class="auto-titulo">Gestión de Turnos</div><div class="auto-desc">Sistema de agenda automatizado con confirmaciones y recordatorios por WhatsApp sin intervención manual.</div></div>
+      <div class="auto-card"><div class="auto-icon">📧</div><div class="auto-titulo">Respuestas Automáticas</div><div class="auto-desc">Atendé consultas frecuentes en Instagram, WhatsApp o email con respuestas inteligentes personalizadas.</div></div>
+      <div class="auto-card"><div class="auto-icon">📊</div><div class="auto-titulo">Reportes Automáticos</div><div class="auto-desc">Generación y envío periódico de reportes de ventas, asistencia o cualquier dato de tu negocio.</div></div>
+      <div class="auto-card"><div class="auto-icon">🔗</div><div class="auto-titulo">Integración de Sistemas</div><div class="auto-desc">Conectamos tus herramientas existentes: Google Sheets, Gmail, WhatsApp, Instagram y más en un solo flujo.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section style="padding:80px 24px;background:var(--card);">
+  <div class="section-inner">
+    <div class="section-tag">🚀 Cómo trabajamos</div>
+    <h2 class="section-title">Simple, rápido y sin vueltas</h2>
+    <p class="section-sub">Sin reuniones eternas ni presupuestos que tardan semanas.</p>
+    <div class="proceso-grid">
+      <div class="paso"><div class="paso-num">1</div><div class="paso-titulo">Me contás qué necesitás</div><div class="paso-desc">Por WhatsApp en 5 minutos me explicás tu situación y qué querés resolver.</div></div>
+      <div class="paso"><div class="paso-num">2</div><div class="paso-titulo">Te muestro la demo</div><div class="paso-desc">Probás el módulo o automatización antes de pagar. Si no te convence, no hay cargo.</div></div>
+      <div class="paso"><div class="paso-num">3</div><div class="paso-titulo">Lo configuramos juntos</div><div class="paso-desc">Te entrego todo funcionando y te explico cómo usarlo sin depender de mí.</div></div>
+      <div class="paso"><div class="paso-num">4</div><div class="paso-titulo">Soporte continuo</div><div class="paso-desc">Seguimos en contacto. Si algo cambia o necesitás ajustes, estoy disponible.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section" id="contacto">
+  <h2>¿Listo para probarlo?</h2>
+  <p>Pedí una demo gratuita por WhatsApp. Te respondo el mismo día.</p>
+  <a href="https://wa.me/5493329599250?text=Hola%20Gerardo,%20vi%20tu%20sitio%20y%20quiero%20una%20demo%20gratuita" target="_blank" class="btn-wsp">
+    <span style="font-size:22px;">💬</span>
+    Escribime por WhatsApp
+  </a>
+  <p style="margin-top:20px;font-size:13px;color:var(--gris);">También podés escribirme a <a href="mailto:dobleproa1900@gmail.com" style="color:#a78bfa;">dobleproa1900@gmail.com</a></p>
+</section>
+
+<footer>
+  <p>© 2026 Gerardo Sobrino · Consultor en IA & Automatización · San Pedro, Buenos Aires</p>
+  <p style="margin-top:6px;"><a href="https://wa.me/5493329599250">WhatsApp: +54 9 3329 599250</a></p>
+</footer>
+
+<script>
+// Animaciones de entrada al hacer scroll (respeta prefers-reduced-motion)
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var selectores = '.section-tag,.section-title,.section-sub,.modulo-card,.auto-card,.paso,.demo-banner,.stat,.cta-section h2,.cta-section p,.btn-wsp';
+  var elems = Array.prototype.slice.call(document.querySelectorAll(selectores));
+  elems.forEach(function(el){ el.classList.add('reveal'); });
+  if (!('IntersectionObserver' in window)) {
+    elems.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var obs = new IntersectionObserver(function(entradas){
+    entradas.forEach(function(e){
+      if (e.isIntersecting) {
+        // stagger entre hermanos del mismo contenedor
+        var padre = e.target.parentElement;
+        var hermanos = Array.prototype.slice.call(padre.children).filter(function(c){ return c.classList.contains('reveal'); });
+        var idx = Math.max(0, hermanos.indexOf(e.target));
+        e.target.style.transitionDelay = Math.min(idx * 70, 350) + 'ms';
+        e.target.classList.add('in');
+        if (e.target.classList.contains('stat')) contarStat(e.target);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  elems.forEach(function(el){ obs.observe(el); });
+
+  // Count-up de estadísticas (conserva prefijos/sufijos como "+", "%", "$")
+  function contarStat(stat){
+    var el = stat.querySelector('.stat-num');
+    if (!el || el.dataset.done) return;
+    el.dataset.done = '1';
+    var texto = el.textContent.trim();
+    var m = texto.match(/(\d+)/);
+    if (!m) return;
+    var destino = parseInt(m[1], 10);
+    var sufijo = texto.slice(m.index + m[1].length);
+    var prefijo = texto.slice(0, m.index);
+    if (destino === 0) return;
+    var pasos = 34, i = 0;
+    var timer = setInterval(function(){
+      i++;
+      var val = Math.round(destino * (1 - Math.pow(1 - i / pasos, 3)));
+      el.textContent = prefijo + val + sufijo;
+      if (i >= pasos) { el.textContent = prefijo + destino + sufijo; clearInterval(timer); }
+    }, 22);
+  }
+})();
+
+// Barra de progreso de scroll + nav sólido al bajar + parallax de orbes
+(function(){
+  var progreso = document.getElementById('progress');
+  var nav = document.querySelector('nav');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var orbes = reduce ? [] : Array.prototype.slice.call(document.querySelectorAll('.orb'));
+  var ticking = false;
+  function actualizar(){
+    var h = document.documentElement;
+    var alto = h.scrollHeight - h.clientHeight;
+    var y = h.scrollTop;
+    var pct = alto > 0 ? (y / alto) * 100 : 0;
+    if (progreso) progreso.style.width = pct + '%';
+    if (nav) nav.classList.toggle('scrolled', y > 20);
+    for (var i = 0; i < orbes.length; i++) {
+      var s = parseFloat(orbes[i].getAttribute('data-speed')) || 0.15;
+      orbes[i].style.transform = 'translate3d(0,' + (y * s).toFixed(1) + 'px,0)';
+    }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if (!ticking) { window.requestAnimationFrame(actualizar); ticking = true; }
+  }, { passive: true });
+  actualizar();
+})();
+</script>
+
+</body>
+</html>
